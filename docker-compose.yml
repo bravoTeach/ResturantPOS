@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-pos-app
+    container_name: laravel-pos-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html  # Mount the current directory to /var/www/html
+      - ./php-local.ini:/usr/local/etc/php/conf.d/php-local.ini
+    networks:
+      - laravel-network
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+  db:
+    image: mysql:5.7
+    container_name: mysql-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pos_db
+      MYSQL_USER: pos_user
+      MYSQL_PASSWORD: pos_password
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - laravel-network
+    ports:
+      - "3306:3306"
+
+volumes:
+  dbdata:
+    driver: local
+
+networks:
+  laravel-network:
+    driver: bridge
